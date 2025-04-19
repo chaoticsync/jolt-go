@@ -1,0 +1,53 @@
+[
+  {
+    "operation": "shift",
+    "spec": {
+      "name": "fullName",
+      "age": "age",
+      "address": {
+        "street": "location.street",
+        "city": "location.city",
+        "zip": "location.zipCode"
+      },
+      "contacts": {
+        "*": {
+          "type": "contactInfo[&1].type",
+          "value": "contactInfo[&1].value"
+        }
+      }
+    }
+  },
+  {
+    "operation": "default",
+    "spec": {
+      "location": {
+        "country": "USA",
+        "state": "NY"
+      },
+      "status": "active"
+    }
+  },
+  {
+    "operation": "modify",
+    "spec": {
+      "age": "@double",
+      "contactInfo": {
+        "*": {
+          "verified": true
+        }
+      }
+    }
+  },
+  {
+    "operation": "sort",
+    "spec": {
+      "order": "asc"
+    }
+  },
+  {
+    "operation": "cardinality",
+    "spec": {
+      "contactInfo": "ONE"
+    }
+  }
+] 
