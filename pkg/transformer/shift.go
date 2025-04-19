@@ -43,21 +43,21 @@ func (t *ShiftTransform) processValue(key string, value interface{}, spec interf
 		if specMap, ok := spec.(map[string]interface{}); ok {
 			// Handle array transformation with wildcard
 			if wildcardSpec, ok := specMap["*"].(map[string]interface{}); ok {
-				contactInfo := make([]interface{}, len(v))
+				result := make([]interface{}, len(v))
 				for i, item := range v {
 					if itemMap, ok := item.(map[string]interface{}); ok {
-						contactItem := make(map[string]interface{})
+						resultItem := make(map[string]interface{})
 						for specKey, specVal := range wildcardSpec {
 							if _, ok := specVal.(string); ok {
 								if val, exists := itemMap[specKey]; exists {
-									contactItem[specKey] = val
+									resultItem[specKey] = val
 								}
 							}
 						}
-						contactInfo[i] = contactItem
+						result[i] = resultItem
 					}
 				}
-				output["contactInfo"] = contactInfo
+				output["contactInfo"] = result
 			} else {
 				output[key] = v
 			}

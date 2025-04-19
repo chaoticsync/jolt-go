@@ -2,6 +2,7 @@ package transformer
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 )
 
@@ -108,32 +109,39 @@ func convertArrayIndices(data map[string]interface{}) map[string]interface{} {
 			parts := strings.Split(key, "[")
 			arrayName := parts[0]
 			indexStr := strings.TrimRight(parts[1], "]")
-			index := int(indexStr[0] - '0')
-
-			// Create array if it doesn't exist
-			if _, exists := result[arrayName]; !exists {
-				result[arrayName] = make([]interface{}, index+1)
-			} else if arr, ok := result[arrayName].([]interface{}); ok {
-				// Extend array if needed
-				if index >= len(arr) {
-					newArr := make([]interface{}, index+1)
-					copy(newArr, arr)
-					result[arrayName] = newArr
-				}
+			index, err := strconv.Atoi(indexStr)
+			if err != nil {
+				continue
 			}
 
-			// Set value at index
-			if arr, ok := result[arrayName].([]interface{}); ok {
-				if index < len(arr) {
-					if mapValue, ok := value.(map[string]interface{}); ok {
-						arr[index] = convertArrayIndices(mapValue)
-					} else {
-						arr[index] = value
-					}
+			// Create or get the array
+			var arr []interface{}
+			if val, exists := result[arrayName]; exists {
+				if existingArr, ok := val.([]interface{}); ok {
+					arr = existingArr
+				} else {
+					arr = make([]interface{}, index+1)
 				}
+			} else {
+				arr = make([]interface{}, index+1)
 			}
+
+			// Ensure array has enough capacity
+			if index >= len(arr) {
+				newArr := make([]interface{}, index+1)
+				copy(newArr, arr)
+				arr = newArr
+			}
+
+			// Set the value at the specified index
+			if mapValue, ok := value.(map[string]interface{}); ok {
+				arr[index] = convertArrayIndices(mapValue)
+			} else {
+				arr[index] = value
+			}
+
+			result[arrayName] = arr
 		} else {
-			// Handle non-array values
 			if mapValue, ok := value.(map[string]interface{}); ok {
 				result[key] = convertArrayIndices(mapValue)
 			} else {
